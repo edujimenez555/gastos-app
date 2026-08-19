@@ -2,7 +2,7 @@
   "name": "Libro de Gastos",
   "short_name": "Gastos",
   "description": "Control de cuentas, cuotas, ingresos y gastos diarios",
-  "version": "0.09",
+  "version": "1.00",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

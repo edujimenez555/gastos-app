@@ -44,14 +44,31 @@
   .wrap{max-width:920px;margin:0 auto;padding:16px 16px 90px; overflow-x:hidden;}
 
   .topbar{
-    display:flex; justify-content:flex-end; gap:8px; margin-bottom:10px; flex-wrap:wrap;
+    display:flex; justify-content:flex-end; margin-bottom:10px; position:relative;
   }
-  .chip-btn{
-    font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:.02em;
+  .menu-wrap{position:relative;}
+  .hamburger-btn{
+    font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
     background:var(--paper-dim); border:1px solid var(--rule-strong); color:var(--ink);
-    padding:7px 12px; border-radius:20px; cursor:pointer; display:flex; align-items:center; gap:6px;
+    padding:8px 14px; border-radius:20px; cursor:pointer; display:flex; align-items:center; gap:8px;
   }
-  .chip-btn:hover{background:#e6dfc8;}
+  .hamburger-btn:hover{background:#e6dfc8;}
+  .dropdown-menu{
+    display:none; position:absolute; right:0; top:calc(100% + 6px);
+    background:var(--paper); border:1px solid var(--rule-strong); border-radius:8px;
+    min-width:200px; box-shadow:0 4px 14px rgba(38,51,43,0.18); overflow:hidden; z-index:60;
+  }
+  .dropdown-menu.open{display:block;}
+  .dropdown-version{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-soft);
+    padding:8px 14px; border-bottom:1px solid var(--rule); letter-spacing:.04em;
+  }
+  .dropdown-menu button{
+    display:flex; align-items:center; gap:8px; width:100%; text-align:left;
+    background:none; border:none; padding:10px 14px; font-family:'Inter',sans-serif;
+    font-size:13.5px; font-weight:500; color:var(--ink); cursor:pointer;
+  }
+  .dropdown-menu button:hover{background:var(--paper-dim);}
   #fileImport{display:none;}
 
   header.cover{
@@ -221,11 +238,16 @@
 <div class="wrap">
 
   <div class="topbar">
-    <span class="chip-btn" style="cursor:default; opacity:.8;">v0.09</span>
-    <button class="chip-btn" onclick="openSettingsForm()">⚙ Configuración</button>
-    <button class="chip-btn" onclick="document.getElementById('fileImport').click()">⇪ Importar Excel</button>
+    <div class="menu-wrap">
+      <button class="hamburger-btn" onclick="toggleMainMenu(event)">☰ Menú</button>
+      <div class="dropdown-menu" id="mainMenu">
+        <div class="dropdown-version" id="menuVersion">v1.00</div>
+        <button onclick="closeMainMenu(); openSettingsForm();">⚙ Configuración</button>
+        <button onclick="closeMainMenu(); document.getElementById('fileImport').click();">⇪ Importar Excel</button>
+        <button onclick="closeMainMenu(); exportToExcel();">⇩ Exportar a Excel</button>
+      </div>
+    </div>
     <input type="file" id="fileImport" accept=".xlsx,.xls">
-    <button class="chip-btn" onclick="exportToExcel()">⇩ Exportar a Excel</button>
   </div>
 
   <header class="cover">
@@ -266,7 +288,7 @@
 
 <script>
 /* ---------- Estado y almacenamiento local ---------- */
-const APP_VERSION = "0.09";
+const APP_VERSION = "1.00";
 const LS_KEYS = { accounts:"gastos_accounts", incomes:"gastos_incomes", expenses:"gastos_expenses", savings:"gastos_savings" };
 let STATE = { accounts: [], incomes: [], expenses: [], savings: [] };
 let viewYM = null; // mes explorado en Resumen
@@ -413,6 +435,22 @@ document.querySelectorAll(".tab-btn").forEach(btn=>{
 });
 
 /* ---------- Modal helper ---------- */
+/* ---------- Menú principal (hamburguesa) ---------- */
+function toggleMainMenu(e){
+  if(e) e.stopPropagation();
+  document.getElementById("mainMenu").classList.toggle("open");
+}
+function closeMainMenu(){
+  document.getElementById("mainMenu").classList.remove("open");
+}
+document.addEventListener("click", (e)=>{
+  const menu = document.getElementById("mainMenu");
+  const wrap = document.querySelector(".menu-wrap");
+  if(menu && menu.classList.contains("open") && wrap && !wrap.contains(e.target)){
+    menu.classList.remove("open");
+  }
+});
+
 function openModal(html){
   document.getElementById("modalBody").innerHTML = html;
   document.getElementById("overlay").classList.add("open");
@@ -467,6 +505,7 @@ function renderResumen(){
   const t = monthTotals(ym);
   const cumNow = cumulativeBalance(ym);
   document.getElementById("eyebrowDate").textContent = "Folio · " + new Date().toLocaleDateString("es-PY") + " · v" + APP_VERSION;
+  const mv = document.getElementById("menuVersion"); if(mv) mv.textContent = "v" + APP_VERSION;
   document.getElementById("coverMonth").textContent = "Mes en curso: " + ymLabel(ym);
   const bf = document.getElementById("balanceFigure");
   bf.textContent = fmtGs(cumNow);
