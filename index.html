@@ -29,17 +29,19 @@
     --brass:#A67C3D;
     --brass-soft:#F1E4C4;
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box; min-width:0;}
   body{margin:0;}
   html,body{
     background:var(--paper);
     color:var(--ink);
     font-family:'Inter',sans-serif;
     -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    width:100%;
   }
   ::selection{background:var(--brass-soft);}
 
-  .wrap{max-width:920px;margin:0 auto;padding:16px 16px 90px;}
+  .wrap{max-width:920px;margin:0 auto;padding:16px 16px 90px; overflow-x:hidden;}
 
   .topbar{
     display:flex; justify-content:flex-end; gap:8px; margin-bottom:10px; flex-wrap:wrap;
@@ -61,6 +63,7 @@
     padding:22px 24px 20px;
     position:relative;
     margin-bottom:22px;
+    overflow:hidden;
   }
   header.cover::before{
     content:"";
@@ -89,22 +92,22 @@
     color:var(--ink-soft);
     font-family:'JetBrains Mono',monospace;
   }
-  .balance-row{margin-left:56px; display:flex; gap:28px; flex-wrap:wrap; align-items:flex-end;}
+  .balance-row{margin-left:56px; display:flex; gap:24px; flex-wrap:wrap; align-items:flex-end;}
   .balance-figure{
-    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:clamp(26px,5vw,40px);
-    border-bottom:3px double var(--ink); padding-bottom:4px;
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:clamp(24px,5vw,38px);
+    border-bottom:3px double var(--ink); padding-bottom:4px; word-break:break-word;
   }
   .balance-figure.neg{color:var(--red);}
   .balance-figure.pos{color:var(--green);}
   .balance-label{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-soft); display:block; margin-bottom:2px;}
-  .mini-stats{display:flex; gap:22px; flex-wrap:wrap;}
-  .mini-stat .balance-figure{font-size:18px; border-bottom:2px solid var(--rule-strong); padding-bottom:2px;}
+  .mini-stats{display:flex; gap:20px; flex-wrap:wrap;}
+  .mini-stat .balance-figure{font-size:17px; border-bottom:2px solid var(--rule-strong); padding-bottom:2px;}
 
-  nav.tabs{display:flex; gap:6px; margin-bottom:18px; overflow-x:auto;}
+  nav.tabs{display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; row-gap:6px;}
   nav.tabs button{
-    font-family:'Roboto Slab',serif; font-weight:600; font-size:14px;
+    font-family:'Roboto Slab',serif; font-weight:600; font-size:13.5px;
     background:var(--paper-dim); border:1px solid var(--rule-strong); border-bottom:none;
-    color:var(--ink-soft); padding:10px 18px 9px; border-radius:6px 6px 0 0; cursor:pointer;
+    color:var(--ink-soft); padding:9px 14px 8px; border-radius:6px 6px 0 0; cursor:pointer;
     white-space:nowrap; position:relative; top:1px;
   }
   nav.tabs button.active{background:var(--paper); color:var(--ink); box-shadow:0 -2px 0 var(--brass) inset;}
@@ -112,10 +115,11 @@
 
   section.panel{
     border:1px solid var(--rule-strong); border-radius:0 4px 4px 4px; background:var(--paper);
-    padding:20px; min-height:300px;
+    padding:20px; min-height:300px; overflow-x:hidden;
   }
   h2.panel-title{font-family:'Roboto Slab',serif; font-size:19px; margin:0 0 4px;}
   p.panel-sub{margin:0 0 18px; color:var(--ink-soft); font-size:13px;}
+  h3.section-h{font-family:'Roboto Slab',serif; font-size:15px; margin:0;}
 
   .btn{
     font-family:'Inter',sans-serif; font-weight:600; font-size:13px;
@@ -133,16 +137,17 @@
   .empty b{color:var(--ink); font-family:'Roboto Slab',serif;}
 
   .ledger{border-top:1px solid var(--rule-strong);}
-  .ledger-row{display:grid; grid-template-columns:1fr auto auto; gap:12px; align-items:center; padding:13px 4px; border-bottom:1px solid var(--rule);}
-  .ledger-row .name{font-weight:600; font-size:14.5px;}
-  .ledger-row .meta{font-size:12px; color:var(--ink-soft); margin-top:2px;}
-  .amount{font-family:'JetBrains Mono',monospace; font-weight:600; font-size:14.5px; text-align:right;}
+  .ledger-row{display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; padding:13px 4px; border-bottom:1px solid var(--rule);}
+  .ledger-row .name{font-weight:600; font-size:14.5px; overflow-wrap:anywhere;}
+  .ledger-row .meta{font-size:12px; color:var(--ink-soft); margin-top:2px; overflow-wrap:anywhere;}
+  .amount{font-family:'JetBrains Mono',monospace; font-weight:600; font-size:14.5px; text-align:right; white-space:nowrap;}
   .amount.neg{color:var(--red);}
   .amount.pos{color:var(--green);}
   .tag{display:inline-block; font-family:'JetBrains Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; padding:2px 7px; border-radius:3px; background:var(--brass-soft); color:var(--brass); margin-right:6px;}
   .tag.red{background:var(--red-soft); color:var(--red);}
+  .tag.green{background:var(--green-soft); color:var(--green);}
 
-  .progress-track{height:6px; width:120px; background:var(--paper-dim); border-radius:4px; overflow:hidden; border:1px solid var(--rule);}
+  .progress-track{height:6px; width:110px; background:var(--paper-dim); border-radius:4px; overflow:hidden; border:1px solid var(--rule); flex-shrink:0;}
   .progress-fill{height:100%; background:var(--green);}
 
   details.acc-detail{margin-top:6px;}
@@ -152,23 +157,23 @@
   details.acc-detail[open] summary:before{content:"▾ ";}
 
   .quota-list{margin-top:10px; border:1px solid var(--rule); border-radius:5px; overflow:hidden;}
-  .quota-row{display:grid; grid-template-columns:auto 1fr auto auto; gap:10px; align-items:center; padding:8px 10px; font-size:13px; border-bottom:1px solid var(--rule); background:var(--paper);}
+  .quota-row{display:grid; grid-template-columns:auto 1fr auto auto; gap:8px; align-items:center; padding:8px 10px; font-size:12.5px; border-bottom:1px solid var(--rule); background:var(--paper);}
   .quota-row:last-child{border-bottom:none;}
   .quota-row.paid{background:var(--green-soft);}
-  .quota-row input[type=checkbox]{width:16px; height:16px; accent-color:var(--green);}
-  .quota-row .qmonth{font-family:'JetBrains Mono',monospace; color:var(--ink-soft);}
-  .quota-row .qamount{font-family:'JetBrains Mono',monospace; text-align:right;}
+  .quota-row input[type=checkbox]{width:16px; height:16px; accent-color:var(--green); flex-shrink:0;}
+  .quota-row .qmonth{font-family:'JetBrains Mono',monospace; color:var(--ink-soft); overflow-wrap:anywhere;}
+  .quota-row .qamount{font-family:'JetBrains Mono',monospace; text-align:right; white-space:nowrap;}
   .add-quota-row{display:flex; gap:8px; padding:10px; background:var(--paper-dim); flex-wrap:wrap;}
-  .add-quota-row input{flex:1; min-width:100px;}
+  .add-quota-row input, .add-quota-row select{flex:1; min-width:110px;}
 
   form .field{margin-bottom:14px;}
   form label{display:block; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin-bottom:5px;}
   form input, form select, form textarea{width:100%; padding:9px 10px; border:1px solid var(--rule-strong); border-radius:5px; background:var(--paper); font-family:'Inter',sans-serif; font-size:14px; color:var(--ink);}
   form input:focus, form select:focus, form textarea:focus{outline:2px solid var(--brass); outline-offset:1px;}
-  .field-row{display:flex; gap:12px;}
-  .field-row .field{flex:1;}
-  .radio-group{display:flex; gap:10px;}
-  .radio-opt{flex:1; border:1px solid var(--rule-strong); border-radius:5px; padding:9px 10px; cursor:pointer; font-size:13px; text-align:center;}
+  .field-row{display:flex; gap:12px; flex-wrap:wrap;}
+  .field-row .field{flex:1; min-width:130px;}
+  .radio-group{display:flex; gap:10px; flex-wrap:wrap;}
+  .radio-opt{flex:1; min-width:120px; border:1px solid var(--rule-strong); border-radius:5px; padding:9px 10px; cursor:pointer; font-size:13px; text-align:center;}
   .radio-opt.sel{border-color:var(--brass); background:var(--brass-soft); font-weight:600;}
   .radio-opt input{display:none;}
 
@@ -177,8 +182,8 @@
   .modal{background:var(--paper); border:1px solid var(--rule-strong); border-radius:8px; max-width:440px; width:100%; padding:22px; margin-top:2vh;}
   .modal h3{font-family:'Roboto Slab',serif; margin:0 0 16px; font-size:18px;}
   .modal p.hint{font-size:12.5px; color:var(--ink-soft); margin:-8px 0 14px;}
-  .modal-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:6px;}
-  .row-actions{display:flex; gap:6px; justify-content:flex-end;}
+  .modal-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:6px; flex-wrap:wrap;}
+  .row-actions{display:flex; gap:6px; justify-content:flex-end; flex-wrap:wrap;}
 
   .upcoming-list, .recent-list{list-style:none; margin:0; padding:0;}
   .upcoming-list li, .recent-list li{display:flex; justify-content:space-between; gap:10px; padding:9px 2px; border-bottom:1px solid var(--rule); font-size:13.5px;}
@@ -186,6 +191,14 @@
   .col-desc{color:var(--ink-soft); font-size:12px;}
 
   .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+
+  .explore-block{border:1px solid var(--rule); border-radius:6px; padding:14px; margin-bottom:20px; background:var(--paper-dim);}
+  .explore-header{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;}
+  .month-nav{display:flex; align-items:center; gap:8px;}
+  .month-nav-label{font-family:'JetBrains Mono',monospace; font-size:13px; min-width:110px; text-align:center;}
+  .explore-stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+  .explore-stats .amount{font-size:15px;}
+
   @media (max-width:640px){
     .grid-2{grid-template-columns:1fr;}
     header.cover::before{left:0; border:none;}
@@ -193,6 +206,8 @@
     .ledger-row{grid-template-columns:1fr auto;}
     .ledger-row .progress-track{display:none;}
     .topbar{justify-content:center;}
+    .explore-stats{grid-template-columns:repeat(2,1fr);}
+    nav.tabs button{font-size:12.5px; padding:8px 10px 7px;}
   }
   .save-flag{
     font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-soft);
@@ -206,7 +221,7 @@
 <div class="wrap">
 
   <div class="topbar">
-    <span class="chip-btn" style="cursor:default; opacity:.8;">v0.01</span>
+    <span class="chip-btn" style="cursor:default; opacity:.8;">v0.03</span>
     <button class="chip-btn" onclick="document.getElementById('fileImport').click()">⇪ Importar Excel</button>
     <input type="file" id="fileImport" accept=".xlsx,.xls">
     <button class="chip-btn" onclick="exportToExcel()">⇩ Exportar a Excel</button>
@@ -223,23 +238,25 @@
       </div>
       <div class="mini-stats">
         <div class="mini-stat"><span class="balance-label">Ingresos</span><div class="balance-figure pos" id="statIngresos">₲ 0</div></div>
-        <div class="mini-stat"><span class="balance-label">Cuotas del mes</span><div class="balance-figure neg" id="statCuotas">₲ 0</div></div>
-        <div class="mini-stat"><span class="balance-label">Gastos del mes</span><div class="balance-figure neg" id="statGastos">₲ 0</div></div>
+        <div class="mini-stat"><span class="balance-label">Gastos fijos</span><div class="balance-figure neg" id="statCuotas">₲ 0</div></div>
+        <div class="mini-stat"><span class="balance-label">Gastos diarios</span><div class="balance-figure neg" id="statGastos">₲ 0</div></div>
       </div>
     </div>
   </header>
 
   <nav class="tabs">
     <button class="tab-btn active" data-tab="resumen">Resumen</button>
-    <button class="tab-btn" data-tab="cuentas">Cuentas</button>
     <button class="tab-btn" data-tab="ingresos">Ingresos</button>
+    <button class="tab-btn" data-tab="fijos">Gastos Fijos</button>
     <button class="tab-btn" data-tab="gastos">Gastos diarios</button>
+    <button class="tab-btn" data-tab="ahorros">Ahorros</button>
   </nav>
 
   <section class="panel" id="panelResumen"></section>
-  <section class="panel" id="panelCuentas" style="display:none;"></section>
   <section class="panel" id="panelIngresos" style="display:none;"></section>
+  <section class="panel" id="panelFijos" style="display:none;"></section>
   <section class="panel" id="panelGastos" style="display:none;"></section>
+  <section class="panel" id="panelAhorros" style="display:none;"></section>
 
 </div>
 
@@ -248,10 +265,11 @@
 
 <script>
 /* ---------- Estado y almacenamiento local ---------- */
-const LS_KEYS = { accounts:"gastos_accounts", incomes:"gastos_incomes", expenses:"gastos_expenses" };
-let STATE = { accounts: [], incomes: [], expenses: [] };
+const APP_VERSION = "0.03";
+const LS_KEYS = { accounts:"gastos_accounts", incomes:"gastos_incomes", expenses:"gastos_expenses", savings:"gastos_savings" };
+let STATE = { accounts: [], incomes: [], expenses: [], savings: [] };
+let viewYM = null; // mes explorado en Resumen
 
-const APP_VERSION = "0.01";
 const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 const CATEGORIAS = ["Alimentación","Transporte","Servicios","Salud","Vivienda","Ocio","Educación","Otros"];
 
@@ -277,15 +295,33 @@ function ymLabel(ym){
   if(!y||!m) return ym||"";
   return MESES[m-1] + " " + y;
 }
+function daysInMonth(year, month){ return new Date(year, month, 0).getDate(); }
+function fechaLabel(dateStr){
+  if(!dateStr) return "";
+  const [y,m,d] = dateStr.split("-").map(Number);
+  if(!y||!m||!d) return dateStr;
+  return String(d).padStart(2,"0") + " " + MESES[m-1].slice(0,3) + " " + y;
+}
+function buildDueDate(startMonth, offsetMonths, day){
+  const ym = addMonths(startMonth, offsetMonths);
+  const [y,m] = ym.split("-").map(Number);
+  const clampedDay = Math.min(day, daysInMonth(y,m));
+  return y + "-" + String(m).padStart(2,"0") + "-" + String(clampedDay).padStart(2,"0");
+}
 
 function loadAll(){
   try{ STATE.accounts = JSON.parse(localStorage.getItem(LS_KEYS.accounts)) || []; }catch(e){ STATE.accounts = []; }
   try{ STATE.incomes = JSON.parse(localStorage.getItem(LS_KEYS.incomes)) || []; }catch(e){ STATE.incomes = []; }
   try{ STATE.expenses = JSON.parse(localStorage.getItem(LS_KEYS.expenses)) || []; }catch(e){ STATE.expenses = []; }
+  try{ STATE.savings = JSON.parse(localStorage.getItem(LS_KEYS.savings)) || []; }catch(e){ STATE.savings = []; }
+  // Migración suave: ingresos viejos sin "type" se consideran fijos
+  STATE.incomes.forEach(i=>{ if(!i.type) i.type = 'fijo'; });
+  viewYM = currentYM();
 }
 function saveAccounts(){ localStorage.setItem(LS_KEYS.accounts, JSON.stringify(STATE.accounts)); flagSaved(); }
 function saveIncomes(){ localStorage.setItem(LS_KEYS.incomes, JSON.stringify(STATE.incomes)); flagSaved(); }
 function saveExpenses(){ localStorage.setItem(LS_KEYS.expenses, JSON.stringify(STATE.expenses)); flagSaved(); }
+function saveSavings(){ localStorage.setItem(LS_KEYS.savings, JSON.stringify(STATE.savings)); flagSaved(); }
 function flagSaved(){
   const f = document.getElementById("saveFlag");
   f.classList.add("show");
@@ -294,7 +330,7 @@ function flagSaved(){
 }
 
 /* ---------- Tabs ---------- */
-const panels = { resumen:"panelResumen", cuentas:"panelCuentas", ingresos:"panelIngresos", gastos:"panelGastos" };
+const panels = { resumen:"panelResumen", ingresos:"panelIngresos", fijos:"panelFijos", gastos:"panelGastos", ahorros:"panelAhorros" };
 document.querySelectorAll(".tab-btn").forEach(btn=>{
   btn.addEventListener("click", ()=>{
     document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
@@ -318,12 +354,21 @@ document.getElementById("overlay").addEventListener("click", (e)=>{ if(e.target.
 
 /* ---------- Cálculos de resumen ---------- */
 function monthTotals(ym){
-  let ingresos = STATE.incomes.reduce((s,i)=>s+Number(i.amount||0),0);
+  let ingresos = 0;
+  STATE.incomes.forEach(i=>{
+    if(i.type==='variable'){
+      if(i.date && i.date.slice(0,7)===ym) ingresos += Number(i.amount||0);
+    } else {
+      ingresos += Number(i.amount||0);
+    }
+  });
   let cuotas = 0;
-  STATE.accounts.forEach(acc=>{ (acc.quotas||[]).forEach(q=>{ if(q.month===ym) cuotas += Number(q.amount||0); }); });
+  STATE.accounts.forEach(acc=>{ (acc.quotas||[]).forEach(q=>{ if(q.dueDate && q.dueDate.slice(0,7)===ym) cuotas += Number(q.amount||0); }); });
   let gastos = STATE.expenses.filter(e=>e.date && e.date.slice(0,7)===ym).reduce((s,e)=>s+Number(e.amount||0),0);
   return {ingresos, cuotas, gastos, balance: ingresos - cuotas - gastos};
 }
+function shiftViewMonth(delta){ viewYM = addMonths(viewYM, delta); renderResumen(); }
+function resetViewMonth(){ viewYM = currentYM(); renderResumen(); }
 
 /* ---------- Render: Resumen ---------- */
 function renderResumen(){
@@ -340,24 +385,45 @@ function renderResumen(){
 
   const panel = document.getElementById("panelResumen");
   let upcoming = [];
-  STATE.accounts.forEach(acc=>{ (acc.quotas||[]).forEach(q=>{ if(!q.paid) upcoming.push({acc:acc.name, month:q.month, amount:q.amount}); }); });
-  upcoming.sort((a,b)=> a.month.localeCompare(b.month));
+  STATE.accounts.forEach(acc=>{ (acc.quotas||[]).forEach(q=>{ if(!q.paid) upcoming.push({acc:acc.name, dueDate:q.dueDate, amount:q.amount}); }); });
+  upcoming.sort((a,b)=> (a.dueDate||"").localeCompare(b.dueDate||""));
   upcoming = upcoming.slice(0,6);
   let recent = [...STATE.expenses].sort((a,b)=> (b.date||"").localeCompare(a.date||"")).slice(0,6);
 
+  const tv = monthTotals(viewYM);
+
   panel.innerHTML = `
-    <h2 class="panel-title">Resumen del mes</h2>
-    <p class="panel-sub">Estado general de cuentas, ingresos y gastos.</p>
+    <h2 class="panel-title">Resumen</h2>
+    <p class="panel-sub">Estado general de ingresos, gastos fijos y gastos diarios.</p>
+
+    <div class="explore-block">
+      <div class="explore-header">
+        <h3 class="section-h">Explorar otro mes</h3>
+        <div class="month-nav">
+          <button class="btn secondary small" onclick="shiftViewMonth(-1)">◀</button>
+          <span class="month-nav-label">${ymLabel(viewYM)}</span>
+          <button class="btn secondary small" onclick="shiftViewMonth(1)">▶</button>
+          ${viewYM!==ym ? `<button class="btn secondary small" onclick="resetViewMonth()">Hoy</button>` : ''}
+        </div>
+      </div>
+      <div class="explore-stats">
+        <div><span class="balance-label">Ingresos</span><div class="amount pos">${fmtGs(tv.ingresos)}</div></div>
+        <div><span class="balance-label">Gastos fijos</span><div class="amount neg">${fmtGs(tv.cuotas)}</div></div>
+        <div><span class="balance-label">Gastos diarios</span><div class="amount neg">${fmtGs(tv.gastos)}</div></div>
+        <div><span class="balance-label">Balance</span><div class="amount ${tv.balance<0?'neg':'pos'}">${fmtGs(tv.balance)}</div></div>
+      </div>
+    </div>
+
     <div class="grid-2">
       <div>
-        <h3 style="font-family:'Roboto Slab',serif; font-size:15px; margin:0 0 10px;">Próximas cuotas</h3>
+        <h3 class="section-h" style="margin:0 0 10px;">Próximos vencimientos</h3>
         ${upcoming.length ? `<ul class="upcoming-list">${upcoming.map(u=>`
-          <li><span>${escapeHtml(u.acc)}<br><span class="col-desc">${ymLabel(u.month)}</span></span>
+          <li><span>${escapeHtml(u.acc)}<br><span class="col-desc">Vence ${fechaLabel(u.dueDate)}</span></span>
           <span class="amount neg">${fmtGs(u.amount)}</span></li>`).join("")}</ul>`
           : `<div class="empty">No hay cuotas pendientes registradas.</div>`}
       </div>
       <div>
-        <h3 style="font-family:'Roboto Slab',serif; font-size:15px; margin:0 0 10px;">Últimos gastos</h3>
+        <h3 class="section-h" style="margin:0 0 10px;">Últimos gastos</h3>
         ${recent.length ? `<ul class="recent-list">${recent.map(r=>`
           <li><span>${escapeHtml(r.category||"Otros")}<br><span class="col-desc">${escapeHtml(r.description||"")} · ${r.date||""}</span></span>
           <span class="amount neg">${fmtGs(r.amount)}</span></li>`).join("")}</ul>`
@@ -367,13 +433,13 @@ function renderResumen(){
   `;
 }
 
-/* ---------- Render: Cuentas ---------- */
-function renderCuentas(){
-  const panel = document.getElementById("panelCuentas");
+/* ---------- Render: Gastos Fijos (cuentas y cuotas) ---------- */
+function renderFijos(){
+  const panel = document.getElementById("panelFijos");
   let html = `
     <div class="toolbar">
       <div>
-        <h2 class="panel-title">Cuentas y cuotas</h2>
+        <h2 class="panel-title">Gastos fijos</h2>
         <p class="panel-sub" style="margin:0;">Préstamos, tarjetas u otras deudas con cuota fija o variable.</p>
       </div>
       <button class="btn" onclick="openAccountForm()">+ Nueva cuenta</button>
@@ -389,7 +455,7 @@ function renderCuentas(){
       const total = quotas.reduce((s,q)=>s+Number(q.amount||0),0);
       const pend = quotas.filter(q=>!q.paid).reduce((s,q)=>s+Number(q.amount||0),0);
       const pct = quotas.length ? Math.round(paidCount/quotas.length*100) : 0;
-      const nextUnpaid = quotas.filter(q=>!q.paid).sort((a,b)=>a.month.localeCompare(b.month))[0];
+      const nextUnpaid = quotas.filter(q=>!q.paid).sort((a,b)=>(a.dueDate||"").localeCompare(b.dueDate||""))[0];
 
       html += `
         <div class="ledger-row" style="grid-template-columns:1fr auto;">
@@ -400,7 +466,7 @@ function renderCuentas(){
                 <span class="tag ${acc.type==='fija'?'':'red'}">${acc.type==='fija'?'Cuota fija':'Cuota variable'}</span>
                 <div class="meta">
                   ${quotas.length} cuota${quotas.length!==1?'s':''} · ${paidCount} pagada${paidCount!==1?'s':''}
-                  ${nextUnpaid? ` · próxima: ${ymLabel(nextUnpaid.month)}` : ' · sin cuotas pendientes'}
+                  ${nextUnpaid? ` · próximo vencimiento: ${fechaLabel(nextUnpaid.dueDate)}` : ' · sin cuotas pendientes'}
                 </div>
               </div>
               <div style="text-align:right;">
@@ -408,7 +474,7 @@ function renderCuentas(){
                 <div class="meta">pendiente de ${fmtGs(total)}</div>
               </div>
             </div>
-            <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap;">
               <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
               <span class="meta">${pct}%</span>
               <div style="margin-left:auto;" class="row-actions">
@@ -419,17 +485,17 @@ function renderCuentas(){
             <details class="acc-detail">
               <summary>Ver cuotas</summary>
               <div class="quota-list">
-                ${quotas.length ? quotas.slice().sort((a,b)=>a.month.localeCompare(b.month)).map(q=>`
+                ${quotas.length ? quotas.slice().sort((a,b)=>(a.dueDate||"").localeCompare(b.dueDate||"")).map(q=>`
                   <div class="quota-row ${q.paid?'paid':''}">
                     <input type="checkbox" ${q.paid?'checked':''} onchange="toggleQuota('${acc.id}','${q.id}')">
-                    <span class="qmonth">${ymLabel(q.month)}</span>
+                    <span class="qmonth">Vence ${fechaLabel(q.dueDate)}</span>
                     <span class="qamount">${fmtGs(q.amount)}</span>
                     <button class="btn danger small" onclick="deleteQuota('${acc.id}','${q.id}')">✕</button>
                   </div>
                 `).join("") : `<div style="padding:10px; font-size:13px; color:var(--ink-soft);">Sin cuotas cargadas.</div>`}
                 ${acc.type==='variable' ? `
                 <div class="add-quota-row">
-                  <input type="month" id="qmonth_${acc.id}">
+                  <input type="date" id="qdate_${acc.id}">
                   <input type="number" placeholder="Monto ₲" id="qamount_${acc.id}">
                   <button class="btn small" onclick="addVariableQuota('${acc.id}')">Agregar cuota</button>
                 </div>` : ''}
@@ -468,21 +534,27 @@ function openAccountForm(id){
         <div class="field-row">
           <div class="field">
             <label>Monto de cada cuota (₲)</label>
-            <input type="number" id="f_quotaAmount" placeholder="500000" value="${acc&&acc.type==='fija'&&acc.quotas&&acc.quotas[0]?acc.quotas[0].amount:''}">
+            <input type="number" id="f_quotaAmount" min="1" placeholder="500000" value="${acc&&acc.type==='fija'&&acc.quotas&&acc.quotas[0]?acc.quotas[0].amount:''}" ${(!acc||acc.type==='fija')?'required':''}>
           </div>
           <div class="field">
             <label>Cantidad de cuotas</label>
-            <input type="number" id="f_numMonths" placeholder="12" value="${acc&&acc.type==='fija'?(acc.quotas?acc.quotas.length:''):''}">
+            <input type="number" id="f_numMonths" min="1" placeholder="12" value="${acc&&acc.type==='fija'?(acc.quotas?acc.quotas.length:''):''}" ${(!acc||acc.type==='fija')?'required':''}>
           </div>
         </div>
-        <div class="field">
-          <label>Mes de la primera cuota</label>
-          <input type="month" id="f_startMonth" value="${acc&&acc.type==='fija'&&acc.quotas&&acc.quotas[0]?acc.quotas[0].month:currentYM()}">
+        <div class="field-row">
+          <div class="field">
+            <label>Mes de la primera cuota</label>
+            <input type="month" id="f_startMonth" value="${acc&&acc.type==='fija'&&acc.quotas&&acc.quotas[0]?acc.quotas[0].dueDate.slice(0,7):currentYM()}" ${(!acc||acc.type==='fija')?'required':''}>
+          </div>
+          <div class="field">
+            <label>Día de vencimiento</label>
+            <input type="number" id="f_dueDay" min="1" max="31" placeholder="15" value="${acc&&acc.type==='fija'&&acc.quotas&&acc.quotas[0]?Number(acc.quotas[0].dueDate.slice(8,10)):''}" ${(!acc||acc.type==='fija')?'required':''}>
+          </div>
         </div>
-        <p class="hint">${acc?'Al guardar cambios en estos campos se regeneran las cuotas (se pierde el estado de pagado).':'Se generarán las cuotas automáticamente con el mismo monto cada mes.'}</p>
+        <p class="hint">${acc?'Al guardar cambios en estos campos se regeneran las cuotas (se pierde el estado de pagado).':'Se generarán las cuotas automáticamente, todas venciendo ese día de cada mes.'}</p>
       </div>
       <div id="variableFields" style="display:none;">
-        <p class="hint">Con cuota variable, cargá cada cuota individualmente desde el detalle de la cuenta luego de guardar.</p>
+        <p class="hint">Con cuota variable, cargá cada cuota individualmente (con su fecha y monto) desde el detalle de la cuenta luego de guardar.</p>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button>
@@ -497,10 +569,12 @@ function openAccountForm(id){
     document.getElementById("optVariable").classList.toggle("sel", !isFija);
     document.getElementById("fijaFields").style.display = isFija ? "block":"none";
     document.getElementById("variableFields").style.display = isFija ? "none":"block";
+    ["f_quotaAmount","f_numMonths","f_startMonth","f_dueDay"].forEach(id=>{ document.getElementById(id).required = isFija; });
   }));
   if(acc && acc.type==='variable'){
     document.getElementById("fijaFields").style.display="none";
     document.getElementById("variableFields").style.display="block";
+    ["f_quotaAmount","f_numMonths","f_startMonth","f_dueDay"].forEach(id=>{ document.getElementById(id).required = false; });
   }
 
   document.getElementById("accForm").addEventListener("submit", (e)=>{
@@ -509,29 +583,20 @@ function openAccountForm(id){
     const tipo = document.querySelector('input[name="tipo"]:checked').value;
     if(!name) return;
 
-    if(acc){
-      acc.name = name;
-      if(tipo==='fija'){
-        const amt = Number(document.getElementById("f_quotaAmount").value)||0;
-        const n = Number(document.getElementById("f_numMonths").value)||0;
-        const start = document.getElementById("f_startMonth").value || currentYM();
-        if(acc.type!=='fija' || amt!==(acc.quotas[0]&&acc.quotas[0].amount) || n!==acc.quotas.length || start!==(acc.quotas[0]&&acc.quotas[0].month)){
-          acc.quotas = generateFixedQuotas(amt, n, start);
-        }
-        acc.type = 'fija';
-      } else {
-        if(acc.type!=='variable'){ acc.quotas = acc.quotas || []; }
-        acc.type = 'variable';
+    if(tipo==='fija'){
+      const amt = Number(document.getElementById("f_quotaAmount").value)||0;
+      const n = Number(document.getElementById("f_numMonths").value)||0;
+      const start = document.getElementById("f_startMonth").value;
+      const day = Number(document.getElementById("f_dueDay").value)||0;
+      if(amt<=0 || n<=0 || !start || day<=0 || day>31){
+        alert("Completá monto de cuota, cantidad de cuotas, mes de la primera cuota y día de vencimiento (todos mayores a cero).");
+        return;
       }
+      if(acc){ acc.name = name; acc.type = 'fija'; acc.quotas = generateFixedQuotas(amt, n, start, day); }
+      else { STATE.accounts.push({ id: uid(), name, type:'fija', quotas: generateFixedQuotas(amt, n, start, day) }); }
     } else {
-      const newAcc = { id: uid(), name, type: tipo, quotas: [] };
-      if(tipo==='fija'){
-        const amt = Number(document.getElementById("f_quotaAmount").value)||0;
-        const n = Number(document.getElementById("f_numMonths").value)||0;
-        const start = document.getElementById("f_startMonth").value || currentYM();
-        newAcc.quotas = generateFixedQuotas(amt, n, start);
-      }
-      STATE.accounts.push(newAcc);
+      if(acc){ acc.name = name; if(acc.type!=='variable'){ acc.quotas = acc.quotas || []; } acc.type = 'variable'; }
+      else { STATE.accounts.push({ id: uid(), name, type:'variable', quotas: [] }); }
     }
     saveAccounts();
     closeModal();
@@ -539,9 +604,9 @@ function openAccountForm(id){
   });
 }
 
-function generateFixedQuotas(amount, numMonths, startMonth){
+function generateFixedQuotas(amount, numMonths, startMonth, dueDay){
   const quotas = [];
-  for(let i=0;i<numMonths;i++){ quotas.push({ id: uid(), month: addMonths(startMonth, i), amount, paid:false }); }
+  for(let i=0;i<numMonths;i++){ quotas.push({ id: uid(), dueDate: buildDueDate(startMonth, i, dueDay), amount, paid:false }); }
   return quotas;
 }
 function toggleQuota(accId, qId){
@@ -557,10 +622,10 @@ function deleteQuota(accId, qId){
 }
 function addVariableQuota(accId){
   const acc = STATE.accounts.find(a=>a.id===accId);
-  const month = document.getElementById("qmonth_"+accId).value;
+  const dueDate = document.getElementById("qdate_"+accId).value;
   const amount = Number(document.getElementById("qamount_"+accId).value);
-  if(!month || !amount) return;
-  acc.quotas.push({ id: uid(), month, amount, paid:false });
+  if(!dueDate || !amount){ alert("Completá la fecha de vencimiento y el monto de la cuota."); return; }
+  acc.quotas.push({ id: uid(), dueDate, amount, paid:false });
   saveAccounts(); renderAll();
 }
 function deleteAccount(id){
@@ -575,23 +640,31 @@ function renderIngresos(){
   let html = `
     <div class="toolbar">
       <div>
-        <h2 class="panel-title">Ingresos mensuales</h2>
-        <p class="panel-sub" style="margin:0;">Sueldos y otros ingresos recurrentes con su fecha de cobro.</p>
+        <h2 class="panel-title">Ingresos</h2>
+        <p class="panel-sub" style="margin:0;">Ingresos fijos que se repiten cada mes, e ingresos variables puntuales.</p>
       </div>
       <button class="btn" onclick="openIncomeForm()">+ Nuevo ingreso</button>
     </div>
   `;
   if(!STATE.incomes.length){
-    html += `<div class="empty"><b>Sin ingresos cargados.</b><br>Agregá tus fuentes de ingreso mensual.</div>`;
+    html += `<div class="empty"><b>Sin ingresos cargados.</b><br>Agregá tus fuentes de ingreso.</div>`;
   } else {
-    const total = STATE.incomes.reduce((s,i)=>s+Number(i.amount||0),0);
+    const totalFijo = STATE.incomes.filter(i=>i.type==='fijo').reduce((s,i)=>s+Number(i.amount||0),0);
+    const sorted = [...STATE.incomes].sort((a,b)=>{
+      if(a.type!==b.type) return a.type==='fijo' ? -1 : 1;
+      return 0;
+    });
     html += `<div class="ledger">`;
-    STATE.incomes.forEach(inc=>{
+    sorted.forEach(inc=>{
       html += `
         <div class="ledger-row">
           <div>
             <span class="name">${escapeHtml(inc.name)}</span>
-            <div class="meta">Cobro el día ${inc.day} de cada mes${inc.notes?' · '+escapeHtml(inc.notes):''}</div>
+            <span class="tag ${inc.type==='fijo'?'green':'red'}">${inc.type==='fijo'?'Fijo':'Variable'}</span>
+            <div class="meta">
+              ${inc.type==='fijo' ? `Cobro el día ${inc.day} de cada mes` : `Cobro puntual: ${fechaLabel(inc.date)}`}
+              ${inc.notes?' · '+escapeHtml(inc.notes):''}
+            </div>
           </div>
           <div class="amount pos">${fmtGs(inc.amount)}</div>
           <div class="row-actions">
@@ -603,7 +676,9 @@ function renderIngresos(){
     });
     html += `
       <div class="ledger-row" style="border-top:3px double var(--ink); background:var(--green-soft);">
-        <div class="name">Total mensual</div><div class="amount pos">${fmtGs(total)}</div><div></div>
+        <div class="name">Total fijo mensual</div>
+        <div class="amount pos">${fmtGs(totalFijo)}</div>
+        <div></div>
       </div>
     </div>`;
   }
@@ -612,16 +687,29 @@ function renderIngresos(){
 
 function openIncomeForm(id){
   const inc = id ? STATE.incomes.find(i=>i.id===id) : null;
+  const isFijo = !inc || inc.type==='fijo';
   openModal(`
     <h3>${inc?'Editar ingreso':'Nuevo ingreso'}</h3>
     <form id="incForm">
       <div class="field">
         <label>Nombre / fuente</label>
-        <input type="text" id="i_name" placeholder="Ej: Sueldo, Alquiler cobrado" value="${inc?escapeAttr(inc.name):''}" required>
+        <input type="text" id="i_name" placeholder="Ej: Sueldo, Venta puntual" value="${inc?escapeAttr(inc.name):''}" required>
+      </div>
+      <div class="field">
+        <label>Tipo de ingreso</label>
+        <div class="radio-group">
+          <label class="radio-opt ${isFijo?'sel':''}" id="optIngFijo">
+            <input type="radio" name="itipo" value="fijo" ${isFijo?'checked':''}> Fijo mensual
+          </label>
+          <label class="radio-opt ${!isFijo?'sel':''}" id="optIngVariable">
+            <input type="radio" name="itipo" value="variable" ${!isFijo?'checked':''}> Variable / puntual
+          </label>
+        </div>
       </div>
       <div class="field-row">
-        <div class="field"><label>Monto mensual (₲)</label><input type="number" id="i_amount" placeholder="4500000" value="${inc?inc.amount:''}" required></div>
-        <div class="field"><label>Día de cobro</label><input type="number" min="1" max="31" id="i_day" placeholder="5" value="${inc?inc.day:''}" required></div>
+        <div class="field"><label>Monto (₲)</label><input type="number" id="i_amount" min="1" placeholder="4500000" value="${inc?inc.amount:''}" required></div>
+        <div class="field" id="fieldDay" style="${isFijo?'':'display:none;'}"><label>Día de cobro</label><input type="number" min="1" max="31" id="i_day" placeholder="5" value="${inc&&inc.day?inc.day:''}" ${isFijo?'required':''}></div>
+        <div class="field" id="fieldDate" style="${!isFijo?'':'display:none;'}"><label>Fecha de cobro</label><input type="date" id="i_date" value="${inc&&inc.date?inc.date:todayISO()}" ${!isFijo?'required':''}></div>
       </div>
       <div class="field"><label>Notas (opcional)</label><input type="text" id="i_notes" value="${inc&&inc.notes?escapeAttr(inc.notes):''}"></div>
       <div class="modal-actions">
@@ -630,14 +718,29 @@ function openIncomeForm(id){
       </div>
     </form>
   `);
+
+  document.querySelectorAll('input[name="itipo"]').forEach(r=>r.addEventListener("change", ()=>{
+    const fijo = document.querySelector('input[name="itipo"][value="fijo"]').checked;
+    document.getElementById("optIngFijo").classList.toggle("sel", fijo);
+    document.getElementById("optIngVariable").classList.toggle("sel", !fijo);
+    document.getElementById("fieldDay").style.display = fijo ? "block":"none";
+    document.getElementById("fieldDate").style.display = fijo ? "none":"block";
+    document.getElementById("i_day").required = fijo;
+    document.getElementById("i_date").required = !fijo;
+  }));
+
   document.getElementById("incForm").addEventListener("submit", (e)=>{
     e.preventDefault();
+    const tipo = document.querySelector('input[name="itipo"]:checked').value;
     const data = {
       name: document.getElementById("i_name").value.trim(),
       amount: Number(document.getElementById("i_amount").value)||0,
-      day: Number(document.getElementById("i_day").value)||1,
+      type: tipo,
       notes: document.getElementById("i_notes").value.trim()
     };
+    if(tipo==='fijo'){ data.day = Number(document.getElementById("i_day").value)||1; data.date = null; }
+    else { data.date = document.getElementById("i_date").value; data.day = null; }
+
     if(inc){ Object.assign(inc, data); } else { STATE.incomes.push({ id: uid(), ...data }); }
     saveIncomes(); closeModal(); renderAll();
   });
@@ -697,7 +800,7 @@ function openExpenseForm(id){
     <form id="expForm">
       <div class="field-row">
         <div class="field"><label>Fecha</label><input type="date" id="e_date" value="${exp?exp.date:todayISO()}" required></div>
-        <div class="field"><label>Monto (₲)</label><input type="number" id="e_amount" placeholder="50000" value="${exp?exp.amount:''}" required></div>
+        <div class="field"><label>Monto (₲)</label><input type="number" id="e_amount" min="1" placeholder="50000" value="${exp?exp.amount:''}" required></div>
       </div>
       <div class="field">
         <label>Categoría</label>
@@ -728,26 +831,160 @@ function deleteExpense(id){
   saveExpenses(); renderAll();
 }
 
+/* ---------- Render: Ahorros ---------- */
+function fundBalance(fund){
+  return (fund.movements||[]).reduce((s,m)=> s + (m.type==='deposito'? Number(m.amount||0) : -Number(m.amount||0)), 0);
+}
+function renderAhorros(){
+  const panel = document.getElementById("panelAhorros");
+  let html = `
+    <div class="toolbar">
+      <div>
+        <h2 class="panel-title">Ahorros</h2>
+        <p class="panel-sub" style="margin:0;">Fondos de ahorro con depósitos y retiros.</p>
+      </div>
+      <button class="btn" onclick="openSavingsForm()">+ Nuevo fondo</button>
+    </div>
+  `;
+  if(!STATE.savings.length){
+    html += `<div class="empty"><b>Sin fondos de ahorro cargados.</b><br>Creá tu primer fondo para empezar a registrar movimientos.</div>`;
+  } else {
+    const totalAhorrado = STATE.savings.reduce((s,f)=>s+fundBalance(f),0);
+    html += `<div class="ledger">`;
+    STATE.savings.forEach(fund=>{
+      const balance = fundBalance(fund);
+      const movs = fund.movements || [];
+      const pct = fund.goal>0 ? Math.min(100, Math.round(balance/fund.goal*100)) : null;
+      html += `
+        <div class="ledger-row" style="grid-template-columns:1fr auto;">
+          <div style="grid-column:1/-1;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
+              <div>
+                <span class="name">${escapeHtml(fund.name)}</span>
+                <div class="meta">
+                  ${movs.length} movimiento${movs.length!==1?'s':''}
+                  ${fund.goal>0 ? ` · objetivo ${fmtGs(fund.goal)}` : ''}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div class="amount pos">${fmtGs(balance)}</div>
+                <div class="meta">saldo actual</div>
+              </div>
+            </div>
+            ${pct!==null ? `
+            <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+              <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
+              <span class="meta">${pct}% del objetivo</span>
+            </div>` : ''}
+            <div style="display:flex; justify-content:flex-end; margin-top:8px;" class="row-actions">
+              <button class="btn secondary small" onclick="openSavingsForm('${fund.id}')">Editar</button>
+              <button class="btn danger small" onclick="deleteSavingsFund('${fund.id}')">Eliminar</button>
+            </div>
+            <details class="acc-detail">
+              <summary>Ver movimientos</summary>
+              <div class="quota-list">
+                ${movs.length ? movs.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")).map(m=>`
+                  <div class="quota-row">
+                    <span class="tag ${m.type==='deposito'?'green':'red'}">${m.type==='deposito'?'Depósito':'Retiro'}</span>
+                    <span class="qmonth">${fechaLabel(m.date)}${m.note?' · '+escapeHtml(m.note):''}</span>
+                    <span class="qamount ${m.type==='deposito'?'':'neg'}">${fmtGs(m.amount)}</span>
+                    <button class="btn danger small" onclick="deleteSavingMovement('${fund.id}','${m.id}')">✕</button>
+                  </div>
+                `).join("") : `<div style="padding:10px; font-size:13px; color:var(--ink-soft);">Sin movimientos cargados.</div>`}
+                <div class="add-quota-row">
+                  <input type="date" id="mdate_${fund.id}" value="${todayISO()}">
+                  <select id="mtype_${fund.id}">
+                    <option value="deposito">Depósito</option>
+                    <option value="retiro">Retiro</option>
+                  </select>
+                  <input type="number" placeholder="Monto ₲" id="mamount_${fund.id}">
+                  <button class="btn small" onclick="addSavingMovement('${fund.id}')">Agregar</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+      `;
+    });
+    html += `
+      <div class="ledger-row" style="border-top:3px double var(--ink); background:var(--green-soft);">
+        <div class="name">Total ahorrado</div><div class="amount pos">${fmtGs(totalAhorrado)}</div><div></div>
+      </div>
+    </div>`;
+  }
+  panel.innerHTML = html;
+}
+
+function openSavingsForm(id){
+  const fund = id ? STATE.savings.find(f=>f.id===id) : null;
+  openModal(`
+    <h3>${fund?'Editar fondo':'Nuevo fondo de ahorro'}</h3>
+    <form id="savForm">
+      <div class="field">
+        <label>Nombre del fondo</label>
+        <input type="text" id="s_name" placeholder="Ej: Fondo de emergencia, Vacaciones" value="${fund?escapeAttr(fund.name):''}" required>
+      </div>
+      <div class="field">
+        <label>Objetivo (₲, opcional)</label>
+        <input type="number" id="s_goal" min="0" placeholder="Dejar vacío si no tenés un objetivo" value="${fund&&fund.goal?fund.goal:''}">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button>
+        <button type="submit" class="btn">${fund?'Guardar cambios':'Crear fondo'}</button>
+      </div>
+    </form>
+  `);
+  document.getElementById("savForm").addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const name = document.getElementById("s_name").value.trim();
+    const goal = Number(document.getElementById("s_goal").value)||0;
+    if(!name) return;
+    if(fund){ fund.name = name; fund.goal = goal; }
+    else { STATE.savings.push({ id: uid(), name, goal, movements: [] }); }
+    saveSavings(); closeModal(); renderAll();
+  });
+}
+function addSavingMovement(fundId){
+  const fund = STATE.savings.find(f=>f.id===fundId);
+  const date = document.getElementById("mdate_"+fundId).value;
+  const type = document.getElementById("mtype_"+fundId).value;
+  const amount = Number(document.getElementById("mamount_"+fundId).value);
+  if(!date || !amount){ alert("Completá la fecha y el monto del movimiento."); return; }
+  fund.movements.push({ id: uid(), date, type, amount });
+  saveSavings(); renderAll();
+}
+function deleteSavingMovement(fundId, movId){
+  const fund = STATE.savings.find(f=>f.id===fundId);
+  fund.movements = fund.movements.filter(m=>m.id!==movId);
+  saveSavings(); renderAll();
+}
+function deleteSavingsFund(id){
+  if(!confirm("¿Eliminar este fondo y todos sus movimientos?")) return;
+  STATE.savings = STATE.savings.filter(f=>f.id!==id);
+  saveSavings(); renderAll();
+}
+
 /* ---------- Exportar / Importar Excel ---------- */
 function exportToExcel(){
   const wsCuentas = [];
   STATE.accounts.forEach(acc=>{
-    if(!acc.quotas || !acc.quotas.length){
-      wsCuentas.push({ Cuenta:acc.name, Tipo:acc.type==='fija'?'Fija':'Variable', Mes:'', Cuota:'', Pagada:'' });
-    } else {
-      acc.quotas.forEach(q=>{
-        wsCuentas.push({ Cuenta:acc.name, Tipo:acc.type==='fija'?'Fija':'Variable', Mes:q.month, Cuota:q.amount, Pagada:q.paid?'Sí':'No' });
-      });
-    }
+    if(!acc.quotas || !acc.quotas.length){ wsCuentas.push({ Cuenta:acc.name, Tipo:acc.type==='fija'?'Fija':'Variable', Vencimiento:'', Cuota:'', Pagada:'' }); }
+    else { acc.quotas.forEach(q=>{ wsCuentas.push({ Cuenta:acc.name, Tipo:acc.type==='fija'?'Fija':'Variable', Vencimiento:q.dueDate, Cuota:q.amount, Pagada:q.paid?'Sí':'No' }); }); }
   });
-  const wsIngresos = STATE.incomes.map(i=>({ Nombre:i.name, Monto:i.amount, DiaCobro:i.day, Notas:i.notes||'' }));
+  const wsIngresos = STATE.incomes.map(i=>({ Nombre:i.name, Tipo:i.type==='fijo'?'Fijo':'Variable', Monto:i.amount, DiaCobro:i.day||'', FechaCobro:i.date||'', Notas:i.notes||'' }));
   const wsGastos = STATE.expenses.map(e=>({ Fecha:e.date, Categoria:e.category, Descripcion:e.description||'', Monto:e.amount }));
+  const wsAhorros = [];
+  STATE.savings.forEach(f=>{
+    if(!f.movements || !f.movements.length){ wsAhorros.push({ Fondo:f.name, Objetivo:f.goal||'', Fecha:'', Tipo:'', Monto:'' }); }
+    else { f.movements.forEach(m=>{ wsAhorros.push({ Fondo:f.name, Objetivo:f.goal||'', Fecha:m.date, Tipo:m.type==='deposito'?'Depósito':'Retiro', Monto:m.amount }); }); }
+  });
 
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsCuentas.length?wsCuentas:[{Cuenta:'',Tipo:'',Mes:'',Cuota:'',Pagada:''}]), "Cuentas");
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsIngresos.length?wsIngresos:[{Nombre:'',Monto:'',DiaCobro:'',Notas:''}]), "Ingresos");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsCuentas.length?wsCuentas:[{Cuenta:'',Tipo:'',Vencimiento:'',Cuota:'',Pagada:''}]), "Gastos Fijos");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsIngresos.length?wsIngresos:[{Nombre:'',Tipo:'',Monto:'',DiaCobro:'',FechaCobro:'',Notas:''}]), "Ingresos");
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsGastos.length?wsGastos:[{Fecha:'',Categoria:'',Descripcion:'',Monto:''}]), "Gastos");
-  XLSX.writeFile(wb, `gastos_${todayISO()}.xlsx`);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsAhorros.length?wsAhorros:[{Fondo:'',Objetivo:'',Fecha:'',Tipo:'',Monto:''}]), "Ahorros");
+  XLSX.writeFile(wb, `gastos_v${APP_VERSION}_${todayISO()}.xlsx`);
 }
 
 document.getElementById("fileImport").addEventListener("change", (e)=>{
@@ -759,41 +996,57 @@ document.getElementById("fileImport").addEventListener("change", (e)=>{
       const wb = XLSX.read(evt.target.result, { type:"binary" });
       const readSheet = (name)=> wb.Sheets[name] ? XLSX.utils.sheet_to_json(wb.Sheets[name]) : [];
 
-      const rowsCuentas = readSheet("Cuentas");
+      const rowsCuentas = readSheet("Gastos Fijos").length ? readSheet("Gastos Fijos") : readSheet("Cuentas");
       const rowsIngresos = readSheet("Ingresos");
       const rowsGastos = readSheet("Gastos");
+      const rowsAhorros = readSheet("Ahorros");
 
       if(!confirm("Importar reemplazará todos los datos actuales guardados en este dispositivo. ¿Continuar?")) return;
 
-      // Reconstruir cuentas agrupando por nombre
       const accMap = new Map();
       rowsCuentas.forEach(r=>{
         const name = (r.Cuenta||"").toString().trim();
         if(!name) return;
         const tipo = (r.Tipo||"").toString().toLowerCase().startsWith("var") ? "variable":"fija";
         if(!accMap.has(name)) accMap.set(name, { id: uid(), name, type: tipo, quotas: [] });
-        if(r.Mes){
-          accMap.get(name).quotas.push({
-            id: uid(),
-            month: r.Mes.toString(),
-            amount: Number(r.Cuota)||0,
-            paid: (r.Pagada||"").toString().toLowerCase().startsWith("s")
-          });
+        const venc = (r.Vencimiento || r.Mes || "").toString();
+        if(venc){
+          accMap.get(name).quotas.push({ id: uid(), dueDate: venc.length===7 ? venc+"-01" : venc, amount: Number(r.Cuota)||0, paid: (r.Pagada||"").toString().toLowerCase().startsWith("s") });
         }
       });
       STATE.accounts = Array.from(accMap.values());
 
-      STATE.incomes = rowsIngresos.filter(r=>r.Nombre).map(r=>({
-        id: uid(), name: r.Nombre.toString(), amount: Number(r.Monto)||0,
-        day: Number(r.DiaCobro)||1, notes: (r.Notas||"").toString()
-      }));
+      STATE.incomes = rowsIngresos.filter(r=>r.Nombre).map(r=>{
+        const tipo = (r.Tipo||"").toString().toLowerCase().startsWith("var") ? "variable":"fijo";
+        return {
+          id: uid(), name: r.Nombre.toString(), type: tipo, amount: Number(r.Monto)||0,
+          day: tipo==='fijo' ? (Number(r.DiaCobro)||1) : null,
+          date: tipo==='variable' ? (r.FechaCobro||"").toString() : null,
+          notes: (r.Notas||"").toString()
+        };
+      });
 
       STATE.expenses = rowsGastos.filter(r=>r.Fecha).map(r=>({
         id: uid(), date: r.Fecha.toString(), category: (r.Categoria||"Otros").toString(),
         description: (r.Descripcion||"").toString(), amount: Number(r.Monto)||0
       }));
 
-      saveAccounts(); saveIncomes(); saveExpenses();
+      const savMap = new Map();
+      rowsAhorros.forEach(r=>{
+        const name = (r.Fondo||"").toString().trim();
+        if(!name) return;
+        if(!savMap.has(name)) savMap.set(name, { id: uid(), name, goal: Number(r.Objetivo)||0, movements: [] });
+        if(r.Fecha){
+          savMap.get(name).movements.push({
+            id: uid(), date: r.Fecha.toString(),
+            type: (r.Tipo||"").toString().toLowerCase().startsWith("dep") ? "deposito":"retiro",
+            amount: Number(r.Monto)||0
+          });
+        }
+      });
+      STATE.savings = Array.from(savMap.values());
+
+      saveAccounts(); saveIncomes(); saveExpenses(); saveSavings();
       renderAll();
       alert("Datos importados correctamente.");
     }catch(err){
@@ -812,9 +1065,10 @@ function escapeAttr(str){ return escapeHtml(str); }
 
 function renderAll(){
   renderResumen();
-  renderCuentas();
   renderIngresos();
+  renderFijos();
   renderGastos();
+  renderAhorros();
 }
 
 /* ---------- Init ---------- */
