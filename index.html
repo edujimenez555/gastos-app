@@ -75,9 +75,7 @@
   header.cover{
     border:1px solid var(--rule-strong);
     border-radius:4px;
-    background:
-      repeating-linear-gradient(180deg, transparent 0 37px, var(--rule) 37px 38px),
-      var(--paper);
+    background:var(--paper);
     padding:26px 24px 20px;
     position:relative;
     margin-bottom:22px;
@@ -220,7 +218,7 @@
     .subdate,.balance-row{margin-left:0;}
     .ledger-row{grid-template-columns:1fr auto;}
     .ledger-row .progress-track{display:none;}
-    .topbar{justify-content:center;}
+    .topbar{justify-content:flex-start;}
     .explore-stats{grid-template-columns:repeat(2,1fr);}
     nav.tabs button{font-size:12.5px; padding:8px 10px 7px;}
   }
@@ -239,7 +237,7 @@
     <div class="menu-wrap">
       <button class="hamburger-btn" onclick="toggleMainMenu(event)">☰</button>
       <div class="dropdown-menu" id="mainMenu">
-        <div class="dropdown-version" id="menuVersion">v1.02</div>
+        <div class="dropdown-version" id="menuVersion">v1.03</div>
         <button onclick="closeMainMenu(); openSettingsForm();">⚙ Configuración</button>
         <button onclick="closeMainMenu(); document.getElementById('fileImport').click();">⇪ Importar Excel</button>
         <button onclick="closeMainMenu(); exportToExcel();">⇩ Exportar a Excel</button>
@@ -285,7 +283,7 @@
 
 <script>
 /* ---------- Estado y almacenamiento local ---------- */
-const APP_VERSION = "1.02";
+const APP_VERSION = "1.03";
 const LS_KEYS = { accounts:"gastos_accounts", incomes:"gastos_incomes", expenses:"gastos_expenses", savings:"gastos_savings" };
 let STATE = { accounts: [], incomes: [], expenses: [], savings: [] };
 let viewYM = null; // mes explorado en Resumen
