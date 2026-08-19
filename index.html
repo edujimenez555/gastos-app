@@ -221,7 +221,7 @@
 <div class="wrap">
 
   <div class="topbar">
-    <span class="chip-btn" style="cursor:default; opacity:.8;">v0.08</span>
+    <span class="chip-btn" style="cursor:default; opacity:.8;">v0.09</span>
     <button class="chip-btn" onclick="openSettingsForm()">⚙ Configuración</button>
     <button class="chip-btn" onclick="document.getElementById('fileImport').click()">⇪ Importar Excel</button>
     <input type="file" id="fileImport" accept=".xlsx,.xls">
@@ -266,7 +266,7 @@
 
 <script>
 /* ---------- Estado y almacenamiento local ---------- */
-const APP_VERSION = "0.08";
+const APP_VERSION = "0.09";
 const LS_KEYS = { accounts:"gastos_accounts", incomes:"gastos_incomes", expenses:"gastos_expenses", savings:"gastos_savings" };
 let STATE = { accounts: [], incomes: [], expenses: [], savings: [] };
 let viewYM = null; // mes explorado en Resumen
@@ -338,11 +338,56 @@ function loadAll(){
   try{ STATE.incomes = JSON.parse(localStorage.getItem(LS_KEYS.incomes)) || []; }catch(e){ STATE.incomes = []; }
   try{ STATE.expenses = JSON.parse(localStorage.getItem(LS_KEYS.expenses)) || []; }catch(e){ STATE.expenses = []; }
   try{ STATE.savings = JSON.parse(localStorage.getItem(LS_KEYS.savings)) || []; }catch(e){ STATE.savings = []; }
-  // Migración suave: ingresos viejos sin "type" se consideran fijos
-  STATE.incomes.forEach(i=>{ if(!i.type) i.type = 'fijo'; });
+  // Migración suave: ingresos viejos sin "type" se consideran fijos; fijos usan "collections" (cobros mes a mes)
+  STATE.incomes.forEach(i=>{
+    if(!i.type) i.type = 'fijo';
+    if(i.type==='fijo' && !i.collections) i.collections = [];
+    if(i.type==='variable' && i.collected===undefined) i.collected = true;
+  });
   viewYM = currentYM();
   ingresosViewYM = currentYM();
   gastosViewYM = currentYM();
+}
+function migrateIncomeHistory(){
+  if(SETTINGS.incomeMigrated) return;
+  const cur = currentYM();
+  const start = SETTINGS.startMonth || cur;
+  let changed = false;
+  STATE.incomes.filter(i=>i.type==='fijo').forEach(inc=>{
+    let m = start;
+    let guard = 0;
+    while(m < cur && guard<600){
+      if(!inc.collections.find(c=>c.ym===m)){
+        inc.collections.push({ id: uid(), ym: m, date: buildDueDate(m,0,inc.day||1), amount: inc.amount, collected: true });
+        changed = true;
+      }
+      m = addMonths(m,1);
+      guard++;
+    }
+  });
+  SETTINGS.incomeMigrated = true;
+  saveSettings();
+  if(changed) saveIncomes();
+}
+function incomeOccurrence(inc, ym){
+  const start = SETTINGS.startMonth || currentYM();
+  if(ym < start) return null;
+  const existing = (inc.collections||[]).find(c=>c.ym===ym);
+  if(existing) return existing;
+  return { id:null, ym, date: buildDueDate(ym,0,inc.day||1), amount: inc.amount, collected:false };
+}
+function toggleIncomeCollected(incId, ym){
+  const inc = STATE.incomes.find(i=>i.id===incId);
+  if(!inc.collections) inc.collections = [];
+  let existing = inc.collections.find(c=>c.ym===ym);
+  if(existing){ existing.collected = !existing.collected; }
+  else { inc.collections.push({ id: uid(), ym, date: buildDueDate(ym,0,inc.day||1), amount: inc.amount, collected:true }); }
+  saveIncomes(); renderAll();
+}
+function toggleVariableCollected(incId){
+  const inc = STATE.incomes.find(i=>i.id===incId);
+  inc.collected = !inc.collected;
+  saveIncomes(); renderAll();
 }
 function saveAccounts(){ localStorage.setItem(LS_KEYS.accounts, JSON.stringify(STATE.accounts)); flagSaved(); }
 function saveIncomes(){ localStorage.setItem(LS_KEYS.incomes, JSON.stringify(STATE.incomes)); flagSaved(); }
@@ -383,9 +428,10 @@ function monthTotals(ym){
   let ingresos = 0;
   STATE.incomes.forEach(i=>{
     if(i.type==='variable'){
-      if(i.date && i.date.slice(0,7)===ym) ingresos += Number(i.amount||0);
+      if(i.date && i.date.slice(0,7)===ym && i.collected!==false) ingresos += Number(i.amount||0);
     } else {
-      ingresos += Number(i.amount||0);
+      const occ = incomeOccurrence(i, ym);
+      if(occ && occ.collected) ingresos += Number(occ.amount||0);
     }
   });
   let cuotas = 0;
@@ -701,7 +747,7 @@ function renderIngresos(){
     <div class="toolbar">
       <div>
         <h2 class="panel-title">Ingresos</h2>
-        <p class="panel-sub" style="margin:0;">Ingresos fijos que se repiten cada mes, e ingresos variables puntuales.</p>
+        <p class="panel-sub" style="margin:0;">Marcá "Cobrado" cuando ya tengas la plata disponible — hasta entonces no suma al balance.</p>
       </div>
       <button class="btn" onclick="openIncomeForm()">+ Nuevo ingreso</button>
     </div>
@@ -711,39 +757,83 @@ function renderIngresos(){
         <button class="btn secondary small" onclick="shiftIngresosMonth(-1)">◀</button>
         <span class="month-nav-label">${ymLabel(ingresosViewYM)}</span>
         <button class="btn secondary small" onclick="shiftIngresosMonth(1)">▶</button>
-      </div>` : `<span class="meta">Mostrando todo el histórico</span>`}
-      <button class="btn secondary small" onclick="toggleIngresosAll()">${ingresosShowAll ? 'Ver por mes' : 'Ver todo el histórico'}</button>
+      </div>` : `<span class="meta">Gestionando las fuentes de ingreso (no un mes en particular)</span>`}
+      <button class="btn secondary small" onclick="toggleIngresosAll()">${ingresosShowAll ? 'Ver por mes' : 'Gestionar fuentes de ingreso'}</button>
     </div>
   `;
+
   if(!STATE.incomes.length){
     html += `<div class="empty"><b>Sin ingresos cargados.</b><br>Agregá tus fuentes de ingreso.</div>`;
-  } else {
-    const visible = ingresosShowAll
-      ? STATE.incomes
-      : STATE.incomes.filter(i=> i.type==='fijo' || (i.type==='variable' && i.date && i.date.slice(0,7)===ingresosViewYM));
+    panel.innerHTML = html;
+    return;
+  }
 
-    if(!visible.length){
-      html += `<div class="empty"><b>Sin ingresos ese mes.</b><br>Los fijos siempre aparecen; los variables solo si tienen fecha en ${ymLabel(ingresosViewYM)}.</div>`;
+  if(ingresosShowAll){
+    // Vista de gestión: las fuentes de ingreso (definiciones), no un mes puntual
+    html += `<div class="ledger">`;
+    STATE.incomes.forEach(inc=>{
+      html += `
+        <div class="ledger-row">
+          <div>
+            <span class="name">${escapeHtml(inc.name)}</span>
+            <span class="tag ${inc.type==='fijo'?'green':'red'}">${inc.type==='fijo'?'Fijo':'Variable'}</span>
+            <div class="meta">
+              ${inc.type==='fijo' ? `Cobro el día ${inc.day} de cada mes (monto actual, editable)` : `Cobro puntual: ${fechaLabel(inc.date)}`}
+              ${inc.notes?' · '+escapeHtml(inc.notes):''}
+            </div>
+          </div>
+          <div class="amount pos">${fmtGs(inc.amount)}</div>
+          <div class="row-actions">
+            <button class="btn secondary small" onclick="openIncomeForm('${inc.id}')">Editar</button>
+            <button class="btn danger small" onclick="deleteIncome('${inc.id}')">✕</button>
+          </div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  } else {
+    // Vista mensual: ocurrencias de ese mes, con checkbox de cobrado
+    const start = SETTINGS.startMonth || currentYM();
+    const fijosDelMes = STATE.incomes.filter(i=>i.type==='fijo').map(inc=>({inc, occ:incomeOccurrence(inc, ingresosViewYM)})).filter(x=>x.occ);
+    const variablesDelMes = STATE.incomes.filter(i=>i.type==='variable' && i.date && i.date.slice(0,7)===ingresosViewYM);
+
+    if(ingresosViewYM < start){
+      html += `<div class="empty"><b>Este mes es anterior al inicio del control.</b><br>Configurado en Configuración: desde ${ymLabel(start)}.</div>`;
+    } else if(!fijosDelMes.length && !variablesDelMes.length){
+      html += `<div class="empty"><b>Sin ingresos ese mes.</b><br>Los fijos aparecen automáticamente desde ${ymLabel(start)}; los variables solo si tienen fecha en ${ymLabel(ingresosViewYM)}.</div>`;
     } else {
-      const totalFijo = STATE.incomes.filter(i=>i.type==='fijo').reduce((s,i)=>s+Number(i.amount||0),0);
-      const totalMes = ingresosShowAll ? null : monthTotals(ingresosViewYM).ingresos;
-      const sorted = [...visible].sort((a,b)=>{
-        if(a.type!==b.type) return a.type==='fijo' ? -1 : 1;
-        return 0;
-      });
+      const totalMes = monthTotals(ingresosViewYM).ingresos;
       html += `<div class="ledger">`;
-      sorted.forEach(inc=>{
+      fijosDelMes.forEach(({inc,occ})=>{
         html += `
           <div class="ledger-row">
             <div>
               <span class="name">${escapeHtml(inc.name)}</span>
-              <span class="tag ${inc.type==='fijo'?'green':'red'}">${inc.type==='fijo'?'Fijo':'Variable'}</span>
-              <div class="meta">
-                ${inc.type==='fijo' ? `Cobro el día ${inc.day} de cada mes` : `Cobro puntual: ${fechaLabel(inc.date)}`}
-                ${inc.notes?' · '+escapeHtml(inc.notes):''}
-              </div>
+              <span class="tag green">Fijo</span>
+              <div class="meta">Vence ${fechaLabel(occ.date)} · ${occ.collected?'Cobrado':'Aún no cobrado'}${inc.notes?' · '+escapeHtml(inc.notes):''}</div>
             </div>
-            <div class="amount pos">${fmtGs(inc.amount)}</div>
+            <div style="display:flex; align-items:center; gap:8px; justify-content:flex-end;">
+              <input type="checkbox" ${occ.collected?'checked':''} onchange="toggleIncomeCollected('${inc.id}','${ingresosViewYM}')" style="width:18px; height:18px; accent-color:var(--green);">
+              <span class="amount pos">${fmtGs(occ.amount)}</span>
+            </div>
+            <div class="row-actions">
+              <button class="btn secondary small" onclick="openIncomeForm('${inc.id}')">Editar fuente</button>
+            </div>
+          </div>
+        `;
+      });
+      variablesDelMes.forEach(inc=>{
+        html += `
+          <div class="ledger-row">
+            <div>
+              <span class="name">${escapeHtml(inc.name)}</span>
+              <span class="tag red">Variable</span>
+              <div class="meta">Cobro puntual: ${fechaLabel(inc.date)} · ${inc.collected?'Cobrado':'Aún no cobrado'}${inc.notes?' · '+escapeHtml(inc.notes):''}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; justify-content:flex-end;">
+              <input type="checkbox" ${inc.collected?'checked':''} onchange="toggleVariableCollected('${inc.id}')" style="width:18px; height:18px; accent-color:var(--green);">
+              <span class="amount pos">${fmtGs(inc.amount)}</span>
+            </div>
             <div class="row-actions">
               <button class="btn secondary small" onclick="openIncomeForm('${inc.id}')">Editar</button>
               <button class="btn danger small" onclick="deleteIncome('${inc.id}')">✕</button>
@@ -753,8 +843,8 @@ function renderIngresos(){
       });
       html += `
         <div class="ledger-row" style="border-top:3px double var(--ink); background:var(--green-soft);">
-          <div class="name">${ingresosShowAll ? 'Total fijo mensual' : `Total de ${ymLabel(ingresosViewYM)}`}</div>
-          <div class="amount pos">${fmtGs(ingresosShowAll ? totalFijo : totalMes)}</div>
+          <div class="name">Total cobrado de ${ymLabel(ingresosViewYM)}</div>
+          <div class="amount pos">${fmtGs(totalMes)}</div>
           <div></div>
         </div>
       </div>`;
@@ -1087,7 +1177,11 @@ function exportToExcel(){
     if(!acc.quotas || !acc.quotas.length){ wsCuentas.push({ Cuenta:acc.name, Tipo:acc.type==='fija'?'Fija':'Variable', Vencimiento:'', Cuota:'', Pagada:'' }); }
     else { acc.quotas.forEach(q=>{ wsCuentas.push({ Cuenta:acc.name, Tipo:acc.type==='fija'?'Fija':'Variable', Vencimiento:q.dueDate, Cuota:q.amount, Pagada:q.paid?'Sí':'No' }); }); }
   });
-  const wsIngresos = STATE.incomes.map(i=>({ Nombre:i.name, Tipo:i.type==='fijo'?'Fijo':'Variable', Monto:i.amount, DiaCobro:i.day||'', FechaCobro:i.date||'', Notas:i.notes||'' }));
+  const wsIngresos = STATE.incomes.map(i=>({ Nombre:i.name, Tipo:i.type==='fijo'?'Fijo':'Variable', Monto:i.amount, DiaCobro:i.day||'', FechaCobro:i.date||'', Cobrado: i.type==='variable' ? (i.collected?'Sí':'No') : '', Notas:i.notes||'' }));
+  const wsCobros = [];
+  STATE.incomes.filter(i=>i.type==='fijo').forEach(inc=>{
+    (inc.collections||[]).forEach(c=>{ wsCobros.push({ Nombre:inc.name, Mes:c.ym, Fecha:c.date, Monto:c.amount, Cobrado:c.collected?'Sí':'No' }); });
+  });
   const wsGastos = STATE.expenses.map(e=>({ Fecha:e.date, Categoria:e.category, Descripcion:e.description||'', Monto:e.amount }));
   const wsAhorros = [];
   STATE.savings.forEach(f=>{
@@ -1097,7 +1191,8 @@ function exportToExcel(){
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsCuentas.length?wsCuentas:[{Cuenta:'',Tipo:'',Vencimiento:'',Cuota:'',Pagada:''}]), "Gastos Fijos");
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsIngresos.length?wsIngresos:[{Nombre:'',Tipo:'',Monto:'',DiaCobro:'',FechaCobro:'',Notas:''}]), "Ingresos");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsIngresos.length?wsIngresos:[{Nombre:'',Tipo:'',Monto:'',DiaCobro:'',FechaCobro:'',Cobrado:'',Notas:''}]), "Ingresos");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsCobros.length?wsCobros:[{Nombre:'',Mes:'',Fecha:'',Monto:'',Cobrado:''}]), "Cobros Mensuales");
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsGastos.length?wsGastos:[{Fecha:'',Categoria:'',Descripcion:'',Monto:''}]), "Gastos");
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsAhorros.length?wsAhorros:[{Fondo:'',Objetivo:'',Fecha:'',Tipo:'',Monto:''}]), "Ahorros");
   XLSX.writeFile(wb, `gastos_v${APP_VERSION}_${todayISO()}.xlsx`);
@@ -1114,6 +1209,7 @@ document.getElementById("fileImport").addEventListener("change", (e)=>{
 
       const rowsCuentas = readSheet("Gastos Fijos").length ? readSheet("Gastos Fijos") : readSheet("Cuentas");
       const rowsIngresos = readSheet("Ingresos");
+      const rowsCobros = readSheet("Cobros Mensuales");
       const rowsGastos = readSheet("Gastos");
       const rowsAhorros = readSheet("Ahorros");
 
@@ -1138,8 +1234,18 @@ document.getElementById("fileImport").addEventListener("change", (e)=>{
           id: uid(), name: r.Nombre.toString(), type: tipo, amount: Number(r.Monto)||0,
           day: tipo==='fijo' ? (Number(r.DiaCobro)||1) : null,
           date: tipo==='variable' ? (r.FechaCobro||"").toString() : null,
+          collected: tipo==='variable' ? (r.Cobrado||"").toString().toLowerCase().startsWith("s") : undefined,
+          collections: tipo==='fijo' ? [] : undefined,
           notes: (r.Notas||"").toString()
         };
+      });
+      rowsCobros.forEach(r=>{
+        const name = (r.Nombre||"").toString().trim();
+        if(!name || !r.Mes) return;
+        const inc = STATE.incomes.find(i=>i.type==='fijo' && i.name===name);
+        if(inc){
+          inc.collections.push({ id: uid(), ym: r.Mes.toString(), date: (r.Fecha||"").toString(), amount: Number(r.Monto)||0, collected: (r.Cobrado||"").toString().toLowerCase().startsWith("s") });
+        }
       });
 
       STATE.expenses = rowsGastos.filter(r=>r.Fecha).map(r=>({
@@ -1226,6 +1332,7 @@ function openSettingsForm(){
 /* ---------- Init ---------- */
 loadSettings();
 loadAll();
+migrateIncomeHistory();
 renderAll();
 
 if("serviceWorker" in navigator){
