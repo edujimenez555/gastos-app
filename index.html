@@ -44,7 +44,7 @@
   .wrap{max-width:920px;margin:0 auto;padding:16px 16px 90px; overflow-x:hidden;}
 
   .topbar{
-    display:flex; justify-content:flex-end; margin-bottom:10px; position:relative;
+    display:flex; justify-content:flex-start; margin-bottom:10px; position:relative;
   }
   .menu-wrap{position:relative;}
   .hamburger-btn{
@@ -55,7 +55,7 @@
   }
   .hamburger-btn:hover{background:#e6dfc8;}
   .dropdown-menu{
-    display:none; position:absolute; right:0; top:calc(100% + 6px);
+    display:none; position:absolute; left:0; top:calc(100% + 6px);
     background:var(--paper); border:1px solid var(--rule-strong); border-radius:8px;
     min-width:200px; box-shadow:0 4px 14px rgba(38,51,43,0.18); overflow:hidden; z-index:60;
   }
@@ -85,16 +85,19 @@
   }
   header.cover::before{
     content:"";
-    position:absolute; left:54px; top:0; bottom:0; width:1px;
+    position:absolute; left:54px; top:80px; bottom:0; width:1px;
     border-left:1px dashed rgba(155,59,44,0.35);
   }
   h1.title{
     font-family:'Roboto Slab',serif;
     font-weight:700;
     font-size:clamp(24px,4.5vw,34px);
-    margin:0 0 6px 56px;
+    margin:0 0 16px 0;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--rule-strong);
     line-height:1.1;
     letter-spacing:-0.01em;
+    text-align:center;
   }
   .subdate{
     margin:0 0 16px 56px;
@@ -214,7 +217,7 @@
   @media (max-width:640px){
     .grid-2{grid-template-columns:1fr;}
     header.cover::before{left:0; border:none;}
-    .title,.subdate,.balance-row{margin-left:0;}
+    .subdate,.balance-row{margin-left:0;}
     .ledger-row{grid-template-columns:1fr auto;}
     .ledger-row .progress-track{display:none;}
     .topbar{justify-content:center;}
@@ -236,7 +239,7 @@
     <div class="menu-wrap">
       <button class="hamburger-btn" onclick="toggleMainMenu(event)">☰</button>
       <div class="dropdown-menu" id="mainMenu">
-        <div class="dropdown-version" id="menuVersion">v1.01</div>
+        <div class="dropdown-version" id="menuVersion">v1.02</div>
         <button onclick="closeMainMenu(); openSettingsForm();">⚙ Configuración</button>
         <button onclick="closeMainMenu(); document.getElementById('fileImport').click();">⇪ Importar Excel</button>
         <button onclick="closeMainMenu(); exportToExcel();">⇩ Exportar a Excel</button>
@@ -282,7 +285,7 @@
 
 <script>
 /* ---------- Estado y almacenamiento local ---------- */
-const APP_VERSION = "1.01";
+const APP_VERSION = "1.02";
 const LS_KEYS = { accounts:"gastos_accounts", incomes:"gastos_incomes", expenses:"gastos_expenses", savings:"gastos_savings" };
 let STATE = { accounts: [], incomes: [], expenses: [], savings: [] };
 let viewYM = null; // mes explorado en Resumen
