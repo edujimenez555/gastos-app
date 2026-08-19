@@ -196,7 +196,7 @@
   .explore-header{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;}
   .month-nav{display:flex; align-items:center; gap:8px;}
   .month-nav-label{font-family:'JetBrains Mono',monospace; font-size:13px; min-width:110px; text-align:center;}
-  .explore-stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+  .explore-stats{display:grid; grid-template-columns:repeat(5,1fr); gap:10px;}
   .explore-stats .amount{font-size:15px;}
 
   @media (max-width:640px){
@@ -221,7 +221,8 @@
 <div class="wrap">
 
   <div class="topbar">
-    <span class="chip-btn" style="cursor:default; opacity:.8;">v0.03</span>
+    <span class="chip-btn" style="cursor:default; opacity:.8;">v0.06</span>
+    <button class="chip-btn" onclick="openSettingsForm()">⚙ Configuración</button>
     <button class="chip-btn" onclick="document.getElementById('fileImport').click()">⇪ Importar Excel</button>
     <input type="file" id="fileImport" accept=".xlsx,.xls">
     <button class="chip-btn" onclick="exportToExcel()">⇩ Exportar a Excel</button>
@@ -233,7 +234,7 @@
     <p class="subdate" id="coverMonth">—</p>
     <div class="balance-row">
       <div>
-        <span class="balance-label">Balance del mes</span>
+        <span class="balance-label" id="balanceLabel">Balance acumulado</span>
         <div class="balance-figure" id="balanceFigure">₲ 0</div>
       </div>
       <div class="mini-stats">
@@ -265,7 +266,7 @@
 
 <script>
 /* ---------- Estado y almacenamiento local ---------- */
-const APP_VERSION = "0.03";
+const APP_VERSION = "0.06";
 const LS_KEYS = { accounts:"gastos_accounts", incomes:"gastos_incomes", expenses:"gastos_expenses", savings:"gastos_savings" };
 let STATE = { accounts: [], incomes: [], expenses: [], savings: [] };
 let viewYM = null; // mes explorado en Resumen
@@ -274,12 +275,33 @@ const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto"
 const CATEGORIAS = ["Alimentación","Transporte","Servicios","Salud","Vivienda","Ocio","Educación","Otros"];
 
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+const CURRENCY_META = {
+  PYG: { symbol:"₲", decimals:0, name:"Guaraní paraguayo" },
+  USD: { symbol:"$", decimals:2, name:"Dólar estadounidense" },
+  ARS: { symbol:"$", decimals:2, name:"Peso argentino" },
+  BRL: { symbol:"R$", decimals:2, name:"Real brasileño" },
+  EUR: { symbol:"€", decimals:2, name:"Euro" }
+};
+let SETTINGS = { currency: "PYG", startMonth: null };
+function loadSettings(){
+  try{ SETTINGS = Object.assign({currency:"PYG", startMonth:null}, JSON.parse(localStorage.getItem("gastos_settings"))||{}); }catch(e){ SETTINGS = {currency:"PYG", startMonth:null}; }
+  if(!SETTINGS.startMonth) SETTINGS.startMonth = currentYM();
+}
+function saveSettings(){ localStorage.setItem("gastos_settings", JSON.stringify(SETTINGS)); flagSaved(); }
+function currencyMeta(){ return CURRENCY_META[SETTINGS.currency] || CURRENCY_META.PYG; }
+function currencySymbol(){ return currencyMeta().symbol; }
+
 function fmtGs(n){
-  n = Math.round(n||0);
+  const meta = currencyMeta();
+  n = Number(n||0);
   const neg = n < 0;
   n = Math.abs(n);
-  const s = n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  return (neg?"-":"") + "₲ " + s;
+  const fixed = n.toFixed(meta.decimals);
+  const [intPart, decPart] = fixed.split(".");
+  const withThousands = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const result = withThousands + (decPart ? ","+decPart : "");
+  return (neg?"-":"") + meta.symbol + " " + result;
 }
 function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
 function currentYM(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); }
@@ -365,7 +387,25 @@ function monthTotals(ym){
   let cuotas = 0;
   STATE.accounts.forEach(acc=>{ (acc.quotas||[]).forEach(q=>{ if(q.dueDate && q.dueDate.slice(0,7)===ym) cuotas += Number(q.amount||0); }); });
   let gastos = STATE.expenses.filter(e=>e.date && e.date.slice(0,7)===ym).reduce((s,e)=>s+Number(e.amount||0),0);
-  return {ingresos, cuotas, gastos, balance: ingresos - cuotas - gastos};
+  let ahorro = 0;
+  STATE.savings.forEach(f=>{ (f.movements||[]).forEach(m=>{
+    if(m.date && m.date.slice(0,7)===ym){ ahorro += (m.type==='deposito' ? Number(m.amount||0) : -Number(m.amount||0)); }
+  }); });
+  return {ingresos, cuotas, gastos, ahorro, balance: ingresos - cuotas - gastos - ahorro};
+}
+function cumulativeBalance(ym){
+  const start = SETTINGS.startMonth || currentYM();
+  if(ym < start) return monthTotals(ym).balance;
+  let total = 0;
+  let m = start;
+  let guard = 0;
+  while(true){
+    total += monthTotals(m).balance;
+    if(m===ym || guard>1200) break;
+    m = addMonths(m,1);
+    guard++;
+  }
+  return total;
 }
 function shiftViewMonth(delta){ viewYM = addMonths(viewYM, delta); renderResumen(); }
 function resetViewMonth(){ viewYM = currentYM(); renderResumen(); }
@@ -374,11 +414,13 @@ function resetViewMonth(){ viewYM = currentYM(); renderResumen(); }
 function renderResumen(){
   const ym = currentYM();
   const t = monthTotals(ym);
+  const cumNow = cumulativeBalance(ym);
   document.getElementById("eyebrowDate").textContent = "Folio · " + new Date().toLocaleDateString("es-PY") + " · v" + APP_VERSION;
   document.getElementById("coverMonth").textContent = "Mes en curso: " + ymLabel(ym);
   const bf = document.getElementById("balanceFigure");
-  bf.textContent = fmtGs(t.balance);
-  bf.className = "balance-figure " + (t.balance<0?"neg":"pos");
+  bf.textContent = fmtGs(cumNow);
+  bf.className = "balance-figure " + (cumNow<0?"neg":"pos");
+  document.getElementById("balanceLabel").textContent = cumNow<0 ? "Balance acumulado (falta cubrir)" : "Balance acumulado";
   document.getElementById("statIngresos").textContent = fmtGs(t.ingresos);
   document.getElementById("statCuotas").textContent = fmtGs(t.cuotas);
   document.getElementById("statGastos").textContent = fmtGs(t.gastos);
@@ -391,10 +433,11 @@ function renderResumen(){
   let recent = [...STATE.expenses].sort((a,b)=> (b.date||"").localeCompare(a.date||"")).slice(0,6);
 
   const tv = monthTotals(viewYM);
+  const cumView = cumulativeBalance(viewYM);
 
   panel.innerHTML = `
     <h2 class="panel-title">Resumen</h2>
-    <p class="panel-sub">Estado general de ingresos, gastos fijos y gastos diarios.</p>
+    <p class="panel-sub">Estado general de ingresos, gastos fijos, gastos diarios y ahorros.</p>
 
     <div class="explore-block">
       <div class="explore-header">
@@ -410,8 +453,17 @@ function renderResumen(){
         <div><span class="balance-label">Ingresos</span><div class="amount pos">${fmtGs(tv.ingresos)}</div></div>
         <div><span class="balance-label">Gastos fijos</span><div class="amount neg">${fmtGs(tv.cuotas)}</div></div>
         <div><span class="balance-label">Gastos diarios</span><div class="amount neg">${fmtGs(tv.gastos)}</div></div>
-        <div><span class="balance-label">Balance</span><div class="amount ${tv.balance<0?'neg':'pos'}">${fmtGs(tv.balance)}</div></div>
+        <div><span class="balance-label">Ahorro neto</span><div class="amount ${tv.ahorro<0?'pos':'neg'}">${fmtGs(tv.ahorro)}</div></div>
+        <div><span class="balance-label">Balance del mes</span><div class="amount ${tv.balance<0?'neg':'pos'}">${fmtGs(tv.balance)}</div></div>
       </div>
+      <div style="margin-top:14px; padding-top:12px; border-top:1px dashed var(--rule-strong); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div>
+          <span class="balance-label">Balance acumulado hasta ${ymLabel(viewYM)}</span>
+          <div class="meta" style="margin-top:2px;">Arrastrado desde ${ymLabel(SETTINGS.startMonth)} · ${cumView<0 ? 'te falta cubrir esto de meses anteriores' : 'incluye lo que te sobró de meses anteriores'}</div>
+        </div>
+        <div class="amount ${cumView<0?'neg':'pos'}" style="font-size:20px;">${fmtGs(cumView)}</div>
+      </div>
+      <p class="hint" style="margin:10px 0 0;">Los depósitos a fondos de ahorro restan del balance del mes (ese dinero deja de estar disponible); los retiros lo devuelven. Podés cambiar el mes de inicio del arrastre en Configuración.</p>
     </div>
 
     <div class="grid-2">
@@ -496,7 +548,7 @@ function renderFijos(){
                 ${acc.type==='variable' ? `
                 <div class="add-quota-row">
                   <input type="date" id="qdate_${acc.id}">
-                  <input type="number" placeholder="Monto ₲" id="qamount_${acc.id}">
+                  <input type="number" placeholder="Monto ${currencySymbol()}" id="qamount_${acc.id}">
                   <button class="btn small" onclick="addVariableQuota('${acc.id}')">Agregar cuota</button>
                 </div>` : ''}
               </div>
@@ -533,7 +585,7 @@ function openAccountForm(id){
       <div id="fijaFields">
         <div class="field-row">
           <div class="field">
-            <label>Monto de cada cuota (₲)</label>
+            <label>Monto de cada cuota (${currencySymbol()})</label>
             <input type="number" id="f_quotaAmount" min="1" placeholder="500000" value="${acc&&acc.type==='fija'&&acc.quotas&&acc.quotas[0]?acc.quotas[0].amount:''}" ${(!acc||acc.type==='fija')?'required':''}>
           </div>
           <div class="field">
@@ -707,7 +759,7 @@ function openIncomeForm(id){
         </div>
       </div>
       <div class="field-row">
-        <div class="field"><label>Monto (₲)</label><input type="number" id="i_amount" min="1" placeholder="4500000" value="${inc?inc.amount:''}" required></div>
+        <div class="field"><label>Monto (${currencySymbol()})</label><input type="number" id="i_amount" min="1" placeholder="4500000" value="${inc?inc.amount:''}" required></div>
         <div class="field" id="fieldDay" style="${isFijo?'':'display:none;'}"><label>Día de cobro</label><input type="number" min="1" max="31" id="i_day" placeholder="5" value="${inc&&inc.day?inc.day:''}" ${isFijo?'required':''}></div>
         <div class="field" id="fieldDate" style="${!isFijo?'':'display:none;'}"><label>Fecha de cobro</label><input type="date" id="i_date" value="${inc&&inc.date?inc.date:todayISO()}" ${!isFijo?'required':''}></div>
       </div>
@@ -800,7 +852,7 @@ function openExpenseForm(id){
     <form id="expForm">
       <div class="field-row">
         <div class="field"><label>Fecha</label><input type="date" id="e_date" value="${exp?exp.date:todayISO()}" required></div>
-        <div class="field"><label>Monto (₲)</label><input type="number" id="e_amount" min="1" placeholder="50000" value="${exp?exp.amount:''}" required></div>
+        <div class="field"><label>Monto (${currencySymbol()})</label><input type="number" id="e_amount" min="1" placeholder="50000" value="${exp?exp.amount:''}" required></div>
       </div>
       <div class="field">
         <label>Categoría</label>
@@ -897,7 +949,7 @@ function renderAhorros(){
                     <option value="deposito">Depósito</option>
                     <option value="retiro">Retiro</option>
                   </select>
-                  <input type="number" placeholder="Monto ₲" id="mamount_${fund.id}">
+                  <input type="number" placeholder="Monto ${currencySymbol()}" id="mamount_${fund.id}">
                   <button class="btn small" onclick="addSavingMovement('${fund.id}')">Agregar</button>
                 </div>
               </div>
@@ -925,9 +977,22 @@ function openSavingsForm(id){
         <input type="text" id="s_name" placeholder="Ej: Fondo de emergencia, Vacaciones" value="${fund?escapeAttr(fund.name):''}" required>
       </div>
       <div class="field">
-        <label>Objetivo (₲, opcional)</label>
+        <label>Objetivo (${currencySymbol()}, opcional)</label>
         <input type="number" id="s_goal" min="0" placeholder="Dejar vacío si no tenés un objetivo" value="${fund&&fund.goal?fund.goal:''}">
       </div>
+      ${!fund ? `
+      <div class="field-row">
+        <div class="field">
+          <label>Saldo inicial (${currencySymbol()}, opcional)</label>
+          <input type="number" id="s_initial" min="0" placeholder="Si ya tenías algo ahorrado">
+        </div>
+        <div class="field">
+          <label>Fecha de ese saldo</label>
+          <input type="date" id="s_initialDate" value="${todayISO()}">
+        </div>
+      </div>
+      <p class="hint">Si ya tenías plata ahorrada antes de usar la app, cargala acá — se registra como un depósito inicial con la fecha que elijas.</p>
+      ` : ''}
       <div class="modal-actions">
         <button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button>
         <button type="submit" class="btn">${fund?'Guardar cambios':'Crear fondo'}</button>
@@ -939,8 +1004,17 @@ function openSavingsForm(id){
     const name = document.getElementById("s_name").value.trim();
     const goal = Number(document.getElementById("s_goal").value)||0;
     if(!name) return;
-    if(fund){ fund.name = name; fund.goal = goal; }
-    else { STATE.savings.push({ id: uid(), name, goal, movements: [] }); }
+    if(fund){
+      fund.name = name; fund.goal = goal;
+    } else {
+      const movements = [];
+      const initialAmt = Number(document.getElementById("s_initial").value)||0;
+      if(initialAmt>0){
+        const initialDate = document.getElementById("s_initialDate").value || todayISO();
+        movements.push({ id: uid(), date: initialDate, type:'deposito', amount: initialAmt, note:'Saldo inicial' });
+      }
+      STATE.savings.push({ id: uid(), name, goal, movements });
+    }
     saveSavings(); closeModal(); renderAll();
   });
 }
@@ -1071,7 +1145,41 @@ function renderAll(){
   renderAhorros();
 }
 
+/* ---------- Configuración ---------- */
+function openSettingsForm(){
+  openModal(`
+    <h3>Configuración</h3>
+    <form id="setForm">
+      <div class="field">
+        <label>Moneda</label>
+        <select id="set_currency">
+          ${Object.keys(CURRENCY_META).map(code=>`<option value="${code}" ${SETTINGS.currency===code?'selected':''}>${CURRENCY_META[code].symbol} — ${CURRENCY_META[code].name}</option>`).join("")}
+        </select>
+      </div>
+      <p class="hint">Cambia el símbolo y el formato con el que se muestran todos los montos de la app. No convierte automáticamente los números ya cargados.</p>
+      <div class="field">
+        <label>Mes de inicio del control</label>
+        <input type="month" id="set_startMonth" value="${SETTINGS.startMonth}">
+      </div>
+      <p class="hint">Desde este mes se arrastra el balance acumulado mes a mes: lo que te sobró (o faltó) se suma al mes siguiente, y así sucesivamente.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button>
+        <button type="submit" class="btn">Guardar</button>
+      </div>
+    </form>
+  `);
+  document.getElementById("setForm").addEventListener("submit", (e)=>{
+    e.preventDefault();
+    SETTINGS.currency = document.getElementById("set_currency").value;
+    SETTINGS.startMonth = document.getElementById("set_startMonth").value || SETTINGS.startMonth;
+    saveSettings();
+    closeModal();
+    renderAll();
+  });
+}
+
 /* ---------- Init ---------- */
+loadSettings();
 loadAll();
 renderAll();
 
